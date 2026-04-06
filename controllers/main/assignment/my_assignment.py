@@ -26,8 +26,37 @@ import cv2
 
 class MyAssignment:
     def __init__(self):
-        # ---- INITIALISE YOUR VARIABLES HERE ----
-        pass
+        # ---------- VARs --------------
+        # CV vars 
+        self.MIN_AREA = 500
+        self.camera_filtered = None
+        self.Canny_threshold_low = 75
+        self.Canny_threshold_high = 150
+
+    def image_filtering (self,camera_data):
+        """
+        Filters camera image to suit shape detection (grayscale, cannyEdge and Shape extraction)
+        
+        Args : 
+            BGRA numpy array
+        Returns : 
+            TBD
+        """
+        red = camera_data[:, :,2]
+        _, red = cv2.threshold(red, 180, 220, cv2.THRESH_BINARY)
+        blur = cv2.GaussianBlur(red,(5, 5), 0) 
+        edges = cv2.Canny(blur, self.Canny_threshold_low, self.Canny_threshold_high)
+        countours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        max_area = 0
+        gate = np.array([])
+        for cnt in countours : 
+            area = cv2.contourArea(cnt)
+            if area > self.MIN_AREA : 
+                approx = cv2.approxPolyDP(cnt, 0.03*cv2.arcLength(cnt, True), True)
+                if area > max_area and len(approx) == 4 : 
+                    gate = approx
+        cv2.drawContours(camera_data, [gate], -1, (0, 255, 0),2) 
+        return [edges, camera_data]
 
     def compute_command(self, sensor_data, camera_data, dt):
 
@@ -35,14 +64,27 @@ class MyAssignment:
         # If you want to display the camera image you can call it in main.py.
 
         # Take off example
-        if sensor_data['z_global'] < 0.49:
-            control_command = [sensor_data['x_global'], sensor_data['y_global'], 1.0, sensor_data['yaw']]
-            return control_command
+        # if sensor_data['z_global'] < 0.49:
+        #     control_command = [sensor_data['x_global'], sensor_data['y_global'], 1.0, sensor_data['yaw']]
+        #     return control_command
 
         # ---- YOUR CODE HERE ----
-        control_command = [sensor_data['x_global'], sensor_data['y_global'], 1.0, sensor_data['yaw']]
-
-        return control_command # Ordered as array with: [pos_x_cmd, pos_y_cmd, pos_z_cmd, yaw_cmd] in meters and radians
+        """
+        TODO : 
+        - Computer Vision to find the gates
+        - Extract inertial frame position of gates
+        - Extract setpoints
+        - Compute motor commands
+        """
+        # ------- COMPUTER VISION ------- 
+        self.camera_filtered = self.image_filtering(camera_data)
+        
+        # control_command = [sensor_data['x_global'], sensor_data['y_global'], 1.0, sensor_data['yaw']]
+        # if self.camera_filtered is not None : 
+        return self.camera_filtered
+        # else : 
+        #     return None
+        # return control_command # Ordered as array with: [pos_x_cmd, pos_y_cmd, pos_z_cmd, yaw_cmd] in meters and radians
 
 
 # Module-level singleton so main.py can call assignment.get_command() unchanged

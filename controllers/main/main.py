@@ -13,12 +13,13 @@ from scipy.spatial.transform import Rotation as R
 import lib.mapping_and_planning_examples as mapping_and_planning_examples
 import time, random
 import threading
+import cv2
 
 exp_num = 4                    # 0: Coordinate Transformation, 1: PID Tuning, 2: Kalman Filter, 3: Motion Planning, 4: Project
 control_style = 'path_planner'      # 'keyboard' or 'path_planner'
 rand_env = True                # Randomise the environment
 
-# Global variables for handling threads
+# Global variables for handling threads 
 latest_sensor_data = None
 latest_camera_data = None
 sensor_lock = threading.Lock()
@@ -656,8 +657,14 @@ def path_planner_thread(drone):
             dt_planner = current_time - last_planner_time
             last_planner_time = current_time
 
-            new_setpoint = assignment.get_command(sensor_data_copy, camera_data_copy, dt_planner)
-            
+            #new_setpoint = assignment.get_command(sensor_data_copy, camera_data_copy, dt_planner)
+            new_setpoint = [sensor_data['x_global'], sensor_data['y_global'], 1.0, -0.7853]
+            edge, image = assignment.get_command(sensor_data_copy, camera_data_copy, dt_planner)
+            if image is not None :
+                # print(f"this is the new image :\n{image}")
+                cv2.imshow("edge", edge)
+                cv2.imshow("image", image)
+                cv2.waitKey(1)
             with setpoint_lock:
                 current_setpoint = new_setpoint
 

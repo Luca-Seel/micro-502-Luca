@@ -56,8 +56,6 @@ class MotionPlanner3D():
         # Outputs: 
         # - The constraint matrix "A_m(t)" [5 x 6]
         # The "A_m" matrix is used to represent the system of equations [x, \dot{x}, \ddot{x}, \dddot{x}, \ddddot{x}]^T  = A_m(t) * poly_coeffs (where poly_coeffs = [c_0, c_1, c_2, c_3, c_4, c_5]^T and represents the unknown polynomial coefficients for one segment)
-        A_m = np.zeros((5,6))
-        
         # TASK: Fill in the constraint factor matrix values where each row corresponds to the positions, velocities, accelerations, snap and jerk here
         # SOLUTION ---------------------------------------------------------------------------------- ## 
         
