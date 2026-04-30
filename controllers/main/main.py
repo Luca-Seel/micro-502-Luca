@@ -658,11 +658,10 @@ def path_planner_thread(drone):
             last_planner_time = current_time
 
             #new_setpoint = assignment.get_command(sensor_data_copy, camera_data_copy, dt_planner)
-            new_setpoint = [sensor_data['x_global'], sensor_data['y_global'], 1.0, -0.7853]
-            edge, image = assignment.get_command(sensor_data_copy, camera_data_copy, dt_planner)
+            image, new_setpoint = assignment.get_command(sensor_data_copy, camera_data_copy, dt_planner)
             if image is not None :
                 # print(f"this is the new image :\n{image}")
-                cv2.imshow("edge", edge)
+                # cv2.imshow("edge", edge)
                 cv2.imshow("image", image)
                 cv2.waitKey(1)
             with setpoint_lock:
